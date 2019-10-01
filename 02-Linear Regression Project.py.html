@@ -1,0 +1,268 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# ___
+# 
+# Source:'http://www.pieriandata.com'
+# # Linear Regression Project 1
+# 
+#  Ecommerce company  that sells clothing online. Customers come in to the store, have sessions/meetings with a personal stylist, then they can go home and order either on a mobile app or website for the clothes they want.
+# 
+# The company is trying to decide whether to focus their efforts on their mobile app experience or their website. 
+
+# 1) Imports
+
+# In[34]:
+
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# 2)Get the Data
+# 
+# 
+
+# In[35]:
+
+
+customers = pd.read_csv("Ecommerce Customers")
+
+
+# 3) Explore data frame (head, info, stat)
+
+# In[36]:
+
+
+customers.head()
+
+
+# In[37]:
+
+
+customers.info()
+
+
+# In[38]:
+
+
+customers.describe()
+
+
+# In[39]:
+
+
+customers.columns
+
+
+# 4) Exploratory Data Analysis
+# Use seaborn to create a jointplot to compare the Time on Website and Yearly Amount Spent columns. 
+# Does the correlation make sense?
+
+# In[40]:
+
+
+sns.jointplot(data=customers, x="Time on Website", y="Yearly Amount Spent")
+
+
+# #Do the same but with the Time on App column 
+
+# In[41]:
+
+
+sns.jointplot(data=customers, x="Time on App", y="Yearly Amount Spent")
+
+
+# ##Use jointplot to create a 2D hex bin plot comparing Time on App and Length of Membership.##
+
+# In[42]:
+
+
+sns.jointplot(x="Time on App", y="Length of Membership", kind="hex", data=customers)
+
+
+# ##Explore  relationships across the entire data set. Use [pairplot](https://stanford.edu/~mwaskom/software/seaborn/tutorial/axis_grids.html#plotting-pairwise-relationships-with-pairgrid-and-pairplot) to recreate the plot below.##
+
+# In[43]:
+
+
+sns.pairplot(customers)
+
+
+# In[ ]:
+
+
+**Based off this plot what looks to be the most correlated feature with Yearly Amount Spent?**
+
+
+# Based on above plot what looks to be the most corelated feature with yearly Amount Spent?
+# Answer: Length of Membership
+
+# ##Create a linear model plot (using seaborn's lmplot) of  Yearly Amount Spent vs. Length of Membership. ##
+
+# In[45]:
+
+
+sns.lmplot(x="Length of Membership", y="Yearly Amount Spent", data= customers)
+
+
+# 5)Training and Testing Data: split the data into training and testing sets.
+#  Set a variable x = numerical features of the customers and a variable y = "Yearly Amount Spent" column. 
+
+# In[46]:
+
+
+customers.columns
+
+
+# In[47]:
+
+
+y = customers["Yearly Amount Spent"]
+x = customers[['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership']]
+
+
+# ##Use model_selection.train_test_split from sklearn to split the data into training and testing sets.
+# Set test_size=0.3 and random_state=101##
+
+# In[48]:
+
+
+from sklearn.model_selection import train_test_split
+
+
+# In[49]:
+
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=101)
+
+
+# 6) Training the Model
+# Import LinearRegression from sklearn.linear_model 
+
+# In[50]:
+
+
+from sklearn.linear_model import LinearRegression
+
+
+# ##Create an function of a LinearRegression() model named lm
+
+# In[51]:
+
+
+lm = LinearRegression()
+
+
+# ** Train/fit lm on the training data.**
+
+# In[52]:
+
+
+lm.fit(x_train, y_train)
+
+
+# **Print out the coefficients of the model**
+
+# In[53]:
+
+
+lm.coef_
+
+
+# 7) Predicting Test Data
+# Now that we have fit our model, let's evaluate its performance by predicting off the test values!
+# 
+# Use lm.predict() to predict off the X_test set of the data.
+
+# In[54]:
+
+
+predictions = lm.predict(x_test)
+
+
+# In[60]:
+
+
+import matplotlib.pyplot as plt
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# ** Create a scatterplot of the real test values versus the predicted values. **
+
+# In[67]:
+
+
+plt.scatter(y_test, predictions)
+plt.xlabel("y Test(True Values)")
+plt.ylabel("Predicted Values")
+
+
+# 8) Evaluating the Model
+# 
+# Let's evaluate our model performance by calculating the residual sum of squares and the explained variance score (R^2).
+# 
+# ##Calculate the Mean Absolute Error, Mean Squared Error, and the Root Mean Squared Error.## 
+# 
+
+# In[68]:
+
+
+from sklearn import metrics
+
+
+# In[70]:
+
+
+print("MAE", metrics.mean_absolute_error(y_test, predictions))
+print("MSE", metrics.mean_squared_error(y_test, predictions))
+print("RMSE", np.sqrt(metrics.mean_squared_error(y_test, predictions)))
+
+
+# In[78]:
+
+
+metrics.explained_variance_score(y_test, predictions)# gives R^2 value
+
+
+# 8) Residuals
+# 
+# So far we have good model with a good fit.
+# Explore the residuals ( difference between real data and predictions) to make sure everything was okay with our data. 
+# 
+# ##Plot a histogram of the residuals and make sure it looks normally distributed. Use either seaborn distplot,
+# or just plt.hist()##
+
+# In[80]:
+
+
+sns.distplot((y_test - predictions), bins=50) # distribution of y_test - predictions
+
+
+# 9) Conclusion: Mobile app Vs Website
+# 
+# ##Recreate the dataframe below. ##
+
+# In[84]:
+
+
+cdf = pd.DataFrame(lm.coef_ , x.columns, columns=["Coeff"])
+cdf
+
+
+# Interpretion of above coefficients: For example if we hold all the parameters fixed and 
+#     increase Avg.Session length by one unit then that means there is an incremnet of price of
+#     Avg Session Length by $26
+
+# What do you think company should focus on  mobile app or Website ?
+# You should discuss the above results with management team to get more insight on financial of each parameters.
+
+# Happy Coding !!!
+
+# In[ ]:
+
+
+
+
